@@ -1,0 +1,69 @@
+{
+  "$ref": "#/definitions/ropa",
+  "definitions": {
+    "ropa": {
+      "type": "object",
+      "properties": {
+        "nombre": {
+          "type": "string"
+        },
+        "precio": {
+          "type": "number"
+        },
+        "categoria": {
+          "type": "string",
+          "enum": [
+            "chaquetas",
+            "playeras",
+            "sudaderas",
+            "pantalones",
+            "accesorios"
+          ]
+        },
+        "imagen": {
+          "type": "string"
+        },
+        "galeria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "color": {
+          "type": "string",
+          "default": "#eaa7c7"
+        },
+        "tallas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "destacado": {
+          "type": "boolean",
+          "default": false
+        },
+        "agotado": {
+          "type": "boolean",
+          "default": false
+        },
+        "linkCompra": {
+          "type": "string",
+          "format": "uri"
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "nombre",
+        "precio",
+        "categoria"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

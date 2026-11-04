@@ -1,0 +1,62 @@
+{
+  "$ref": "#/definitions/chunks",
+  "definitions": {
+    "chunks": {
+      "type": "object",
+      "properties": {
+        "nombre": {
+          "type": "string"
+        },
+        "precio": {
+          "type": "number"
+        },
+        "categoria": {
+          "type": "string",
+          "enum": [
+            "brownies",
+            "galletas"
+          ]
+        },
+        "presentacion": {
+          "type": "string"
+        },
+        "descripcion": {
+          "type": "string",
+          "default": ""
+        },
+        "ingredientes": {
+          "type": "string"
+        },
+        "imagen": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "default": "#eaa7c7"
+        },
+        "agotado": {
+          "type": "boolean",
+          "default": false
+        },
+        "orden": {
+          "type": "number",
+          "default": 0
+        },
+        "linkPedido": {
+          "type": "string",
+          "format": "uri"
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "nombre",
+        "precio",
+        "categoria"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

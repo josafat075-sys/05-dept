@@ -1,0 +1,198 @@
+---
+/**
+ * CatalogoInteractivo
+ * Lista filtrable por categoría + buscador de texto (ignora acentos y mayúsculas).
+ * Se usa con ropa (/tienda) y con videos (/videos):
+ *   <CatalogoInteractivo tipo="ropa" prendas={prendas} />
+ *   <CatalogoInteractivo tipo="videos" videos={videos} />
+ * - En ropa, las categorías son chaquetas, playeras, etc.
+ * - En videos, las categorías son las plataformas (YouTube, TikTok, Instagram).
+ * - El estado se guarda en la URL (?cat=tiktok&q=...) para poder compartir enlaces.
+ *
+ * Todo el HTML se genera en el build (bueno para SEO); el JS solo muestra/oculta tarjetas.
+ */
+import type { CollectionEntry } from 'astro:content';
+import TarjetaProducto from './TarjetaProducto.astro';
+import TarjetaVideo from './TarjetaVideo.astro';
+import { etiqueta, normalizar } from '../utils';
+
+interface Props {
+  tipo: 'ropa' | 'videos';
+  prendas?: CollectionEntry<'ropa'>[];
+  videos?: CollectionEntry<'videos'>[];
+}
+
+const { tipo, prendas = [], videos = [] } = Astro.props;
+
+const itemsRopa = prendas.map((p) => ({
+  id: p.id,
+  cat: p.data.categoria as string,
+  texto: normalizar(`${p.data.nombre} ${etiqueta(p.data.categoria)}`),
+  prenda: p,
+}));
+
+const itemsVideos = videos.map((v) => ({
+  id: v.id,
+  cat: v.data.plataforma as string,
+  texto: normalizar(`${v.data.titulo} ${v.data.descripcion} ${etiqueta(v.data.plataforma)}`),
+  video: v,
+}));
+
+const base: { cat: string }[] = tipo === 'ropa' ? itemsRopa : itemsVideos;
+
+// Cuenta cuántos elementos hay por categoría
+const conteo = new Map<string, number>();
+for (const el of base) conteo.set(el.cat, (conteo.get(el.cat) ?? 0) + 1);
+const categorias = [...conteo.entries()].map(([slug, total]) => ({ slug, total }));
+
+const textos =
+  tipo === 'ropa'
+    ? { todas: 'Todas', singular: 'prenda', plural: 'prendas', buscar: 'Buscar prenda…' }
+    : { todas: 'Todos', singular: 'video', plural: 'videos', buscar: 'Buscar video…' };
+---
+
+<section class="catalogo" data-catalogo data-singular={textos.singular} data-plural={textos.plural}>
+  <label class="buscador">
+    <span class="solo-lectores">Buscar</span>
+    <input type="search" placeholder={textos.buscar} data-buscador autocomplete="off" />
+  </label>
+
+  <div class="chips" role="group" aria-label="Categorías">
+    <button type="button" data-chip="todas" aria-pressed="true">
+      {textos.todas} <span class="num">{base.length}</span>
+    </button>
+    {
+      categorias.map((c) => (
+        <button type="button" data-chip={c.slug} aria-pressed="false">
+          {etiqueta(c.slug)} <span class="num">{c.total}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <p class="contador" data-contador aria-live="polite"></p>
+
+  <ul class={`rejilla ${tipo}`}>
+    {
+      tipo === 'ropa' &&
+        itemsRopa.map((i) => (
+          <li data-item data-cat={i.cat} data-texto={i.texto}>
+            <TarjetaProducto prenda={i.prenda} />
+          </li>
+        ))
+    }
+    {
+      tipo === 'videos' &&
+        itemsVideos.map((i, n) => (
+          <li data-item data-cat={i.cat} data-texto={i.texto}>
+            <TarjetaVideo video={i.video} indice={n} />
+          </li>
+        ))
+    }
+  </ul>
+
+  <div class="vacio" data-vacio hidden>
+    <p>No encontramos nada con ese filtro.</p>
+    <button type="button" class="boton" data-limpiar>Limpiar filtros</button>
+  </div>
+</section>
+
+<style>
+  .catalogo { display: grid; gap: 18px; }
+
+  /* Videos: paneles pegados, con gruesas líneas negras entre ellos (como tu referencia de zine) */
+  .videos { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0; padding-top: 14px; }
+
+  .buscador input {
+    width: 100%; max-width: 440px; padding: 12px 16px; font: 700 0.85rem var(--f-mono);
+    text-transform: uppercase; border: var(--borde); border-radius: 0; background: var(--papel); color: var(--tinta);
+  }
+  .buscador input:focus { outline: 3px solid var(--acento); outline-offset: 2px; background: #f6f2ea; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button {
+    font: 700 0.78rem var(--f-mono); text-transform: uppercase; letter-spacing: 0.06em;
+    cursor: pointer; padding: 8px 14px; border-radius: 0;
+    border: var(--borde); background: var(--papel); color: var(--tinta);
+    transition: background 0.12s, color 0.12s;
+  }
+  .chips button:hover { background: var(--mostaza); }
+  .chips button[aria-pressed='true'] { background: var(--tinta); color: var(--mostaza); }
+
+  .num { opacity: 0.6; font-size: 0.9em; margin-left: 2px; }
+  .contador { margin: 0; color: var(--suave); font: 700 0.78rem var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .vacio { text-align: center; padding: 48px 0; color: var(--suave); }
+
+  .solo-lectores {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+</style>
+
+<script>
+  const raiz = document.querySelector<HTMLElement>('[data-catalogo]');
+
+  if (raiz) {
+    const chips = raiz.querySelectorAll<HTMLButtonElement>('[data-chip]');
+    const items = raiz.querySelectorAll<HTMLElement>('[data-item]');
+    const buscador = raiz.querySelector<HTMLInputElement>('[data-buscador]')!;
+    const contador = raiz.querySelector<HTMLElement>('[data-contador]')!;
+    const vacio = raiz.querySelector<HTMLElement>('[data-vacio]')!;
+    const botonLimpiar = raiz.querySelector<HTMLButtonElement>('[data-limpiar]')!;
+    const singular = raiz.dataset.singular ?? 'elemento';
+    const plural = raiz.dataset.plural ?? 'elementos';
+
+    const normalizar = (t: string) => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+    // Estado inicial: se lee de la URL si viene con filtros
+    const params = new URLSearchParams(location.search);
+    const estado = { cat: params.get('cat') ?? 'todas', q: params.get('q') ?? '' };
+    buscador.value = estado.q;
+
+    function pintar() {
+      const q = normalizar(estado.q.trim());
+
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.chip === estado.cat)));
+
+      let visibles = 0;
+      items.forEach((el) => {
+        const coincide =
+          (estado.cat === 'todas' || el.dataset.cat === estado.cat) &&
+          (q === '' || (el.dataset.texto ?? '').includes(q));
+        el.hidden = !coincide;
+        if (coincide) visibles++;
+      });
+
+      contador.textContent = visibles > 0 ? `${visibles} ${visibles === 1 ? singular : plural}` : '';
+      vacio.hidden = visibles > 0;
+
+      // Guardar estado en la URL sin recargar
+      const nuevo = new URLSearchParams();
+      if (estado.cat !== 'todas') nuevo.set('cat', estado.cat);
+      if (estado.q.trim()) nuevo.set('q', estado.q.trim());
+      const qs = nuevo.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }
+
+    chips.forEach((c) =>
+      c.addEventListener('click', () => {
+        estado.cat = c.dataset.chip ?? 'todas';
+        pintar();
+      })
+    );
+
+    buscador.addEventListener('input', () => {
+      estado.q = buscador.value;
+      pintar();
+    });
+
+    botonLimpiar.addEventListener('click', () => {
+      estado.cat = 'todas';
+      estado.q = '';
+      buscador.value = '';
+      pintar();
+    });
+
+    pintar();
+  }
+</script>

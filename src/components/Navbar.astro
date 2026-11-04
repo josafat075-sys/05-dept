@@ -1,0 +1,88 @@
+---
+import { SITIO } from '../config';
+
+const enlaces = [
+  { href: '/', texto: 'Inicio' },
+  { href: '/tienda', texto: 'Tienda' },
+  { href: '/videos', texto: 'Videos' },
+  { href: '/devils-chunks', texto: "Devil's Chunks" },
+  { href: '/sobre-mi', texto: 'Sobre mí' },
+];
+
+// Frases de la cinta que corre arriba. Edítalas a tu gusto.
+const cinta = ['Saltillo 2026', 'Ropa de archivo', 'Vintage / Sports / Streetwear', '05 DEPT.'];
+
+const ruta = Astro.url.pathname;
+const activo = (href: string) => (href === '/' ? ruta === '/' : ruta.startsWith(href));
+---
+
+<header class="cabecera">
+  <div class="barra contenedor">
+    <a href="/" class="logo" aria-label={`${SITIO.nombre} — inicio`}>
+      <img src="/img/isotipo-cabeza.png" alt="" /><img class="logo-wordmark" src="/img/logo-05dept-horizontal.jpg" alt="05 DEPT." />
+    </a>
+    <nav aria-label="Principal">
+      <ul>
+        {
+          enlaces.map((e) => (
+            <li>
+              <a href={e.href} aria-current={activo(e.href) ? 'page' : undefined}>
+                {e.texto}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="cinta" aria-hidden="true">
+    <div class="pista">
+      {
+        [0, 1].map(() => (
+          <span>
+            {cinta.map((t) => (
+              <em>{t}</em>
+            ))}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</header>
+
+<style>
+  .cabecera { position: sticky; top: 0; z-index: 50; background: var(--tinta); color: var(--papel); border-bottom: 1px solid var(--mostaza); }
+
+  .barra { display: flex; align-items: center; justify-content: space-between; min-height: 60px; gap: 16px; }
+
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
+  .logo > img:first-child { width: 42px; height: 42px; object-fit: contain; background: var(--papel); border: 2px solid var(--mostaza); border-radius: 50%; padding: 2px; }
+  .logo .logo-wordmark { width: 116px; height: 30px; object-fit: contain; background: var(--papel); }
+
+  ul { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+  nav a {
+    display: block; text-decoration: none; padding: 6px 10px;
+    font: 700 0.78rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  nav a:hover { background: var(--papel); color: var(--tinta); }
+  nav a[aria-current='page'] { background: var(--mostaza); color: var(--tinta); }
+
+  /* Cinta que corre */
+  .cinta { background: var(--fucsia); color: #fff7e8; overflow: hidden; border-top: 2px solid var(--tinta); border-bottom: 2px solid var(--tinta); }
+  .pista { display: flex; width: max-content; animation: correr 30s linear infinite; }
+  .pista span { display: flex; }
+  .pista em {
+    font: 700 0.72rem/1 var(--f-mono); font-style: normal; text-transform: uppercase;
+    letter-spacing: 0.12em; padding: 7px 0 7px 28px; white-space: nowrap;
+  }
+  .pista em::after { content: '×'; margin-left: 28px; }
+  @keyframes correr { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .pista { animation: none; } }
+
+  @media (max-width: 560px) {
+    .barra { flex-wrap: wrap; padding-block: 8px; }
+    ul { flex-wrap: wrap; }
+    nav a { padding: 5px 8px; font-size: 0.7rem; }
+  }
+</style>

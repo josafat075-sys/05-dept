@@ -1,0 +1,72 @@
+{
+  "$ref": "#/definitions/videos",
+  "definitions": {
+    "videos": {
+      "type": "object",
+      "properties": {
+        "titulo": {
+          "type": "string"
+        },
+        "descripcion": {
+          "type": "string",
+          "default": ""
+        },
+        "fecha": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "plataforma": {
+          "type": "string",
+          "enum": [
+            "youtube",
+            "tiktok",
+            "instagram"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "fragmento": {
+          "type": "string"
+        },
+        "miniatura": {
+          "type": "string"
+        },
+        "duracion": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "borrador": {
+          "type": "boolean",
+          "default": false
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "titulo",
+        "fecha",
+        "plataforma",
+        "url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

@@ -1,0 +1,128 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import TarjetaProducto from '../components/TarjetaProducto.astro';
+import TarjetaVideo from '../components/TarjetaVideo.astro';
+import { SITIO } from '../config';
+
+const prendas = await getCollection('ropa');
+const destacadas = prendas.filter((p) => p.data.destacado).slice(0, 4);
+
+const videos = (await getCollection('videos', ({ data }) => !data.borrador))
+  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime())
+  .slice(0, 3);
+---
+
+<Base>
+  <section class="contenedor hero">
+    <div class="portada-editorial">
+      <div class="portada-top mono"><span>05 DEPT. / DEPARTAMENTO DE OBJETOS</span><span>COAH. MX — 2026</span></div>
+      <div class="portada-copy">
+        <span class="sello mono">VOL. 01<br />ARCHIVO VIVO</span>
+        <p class="mono ciudad">SALTILLO <span>///</span> 2026</p>
+        <h2>Wear it<br /><i>again.</i></h2>
+        <p class="portada-sub">Vintage · Sportswear · Second hand</p>
+      </div>
+      <img class="cabeza-hero" src="/img/isotipo-cabeza.png" alt="Isotipo ilustrado de 05 DEPT." />
+      <span class="numero mono">05<br />—<br />26</span>
+      <div class="portada-bottom mono"><span>PRE-LOVED / RE-FOUND</span><span>NO RULES. JUST GOOD PIECES.</span></div>
+    </div>
+
+    <div class="pie">
+      <div>
+        <p class="mono">Saltillo 2026 / Archivo abierto</p>
+        <h1>Ropa con<br />otra <span class="gotica">historia.</span></h1>
+      </div>
+      <div class="texto">
+        <p>{SITIO.descripcion}</p>
+        <p>
+          <a class="boton" href="/tienda">Ver la tienda</a>
+          <a class="boton claro" href="/videos">Ver videos</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion contenedor">
+    <div class="encabezado">
+      <h2>Favoritas</h2>
+      <a class="mono ver-todo" href="/tienda">01 / Ver toda la tienda →</a>
+    </div>
+    <ul class="rejilla">
+      {destacadas.map((p) => <li><TarjetaProducto prenda={p} /></li>)}
+    </ul>
+  </section>
+
+  <section class="seccion contenedor">
+    <div class="encabezado">
+      <h2>Videos</h2>
+      <a class="mono ver-todo" href="/videos">02 / Ver todos →</a>
+    </div>
+    <ul class="rejilla videos">
+      {videos.map((v, n) => <li><TarjetaVideo video={v} indice={n} /></li>)}
+    </ul>
+  </section>
+
+  <section class="contenedor chunks">
+    <a class="banner" href="/devils-chunks" aria-label="Entrar a Devil's Chunks">
+      <img src="/img/devils-chunks-portada.jpg" alt="Devil's Chunks" width="220" height="223" loading="lazy" />
+      <span class="mono">03 / Otro proyecto<br />Entrar →</span>
+    </a>
+  </section>
+</Base>
+
+<style>
+  .hero { padding-block: 28px 24px; }
+  .portada-editorial {
+    min-height: clamp(360px, 48vw, 590px); position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: clamp(16px, 3vw, 34px); color: var(--crema);
+    background: var(--tinta); border: 3px solid var(--tinta);
+    box-shadow: 10px 10px 0 var(--fucsia); isolation: isolate;
+  }
+  .portada-editorial::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; opacity: .9;
+    background: radial-gradient(circle at 76% 42%, rgba(39,190,115,.28), transparent 28%),
+      repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,.035) 18px 20px);
+  }
+  .portada-top, .portada-bottom { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.65rem; color:var(--mostaza); }
+  .portada-copy { position:relative; z-index:2; width: min(76%, 760px); padding-block: 28px; }
+  .ciudad { color:var(--verde); font-weight:700; font-size:clamp(.8rem,2vw,1.1rem); letter-spacing:.18em; }
+  .ciudad span { color:var(--fucsia); }
+  .portada-copy h2 { font-size:clamp(4rem,12vw,9.5rem); margin:14px 0; line-height:.78; letter-spacing:-.09em; }
+  .portada-copy h2 i { color:var(--mostaza); font-family:var(--f-gotica); font-weight:700; }
+  .portada-sub { display:inline-block; padding:7px 11px; color:var(--tinta); background:var(--verde); font:700 .72rem var(--f-mono); text-transform:uppercase; transform:rotate(-2deg); }
+  .sello { position:absolute; right:2%; top:2%; z-index:3; padding:10px; border:2px solid var(--fucsia); color:var(--fucsia); transform:rotate(8deg); font-size:.65rem; }
+  .cabeza-hero { position:absolute; width:clamp(170px,32vw,390px); right:7%; bottom:10%; z-index:1; filter:drop-shadow(9px 10px 0 var(--fucsia)); transform:rotate(5deg); }
+
+  .pie {
+    display: grid; gap: 28px; grid-template-columns: 1.2fr 1fr; align-items: end;
+    padding-top: 28px;
+  }
+  .pie p { margin: 0; }
+  h1 { font-size: clamp(2.8rem, 9vw, 6.5rem); margin: 10px 0 0; }
+  h1 .gotica { color: var(--fucsia); }
+  .texto { display: grid; gap: 18px; max-width: 460px; }
+  .texto > p:first-child { color: var(--suave); font-size: 1.05rem; }
+  .texto .boton { margin: 0 8px 8px 0; }
+
+  .ver-todo { text-decoration: none; padding: 4px 8px; }
+  .ver-todo:hover { background: var(--mostaza); }
+
+  .videos { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0; padding-top: 14px; }
+
+  .chunks { padding-block: 24px 8px; }
+  /* Banner de Devil's Chunks: usa su propia imagen (ya trae su tipografía) */
+  .banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    padding: 16px; background: #0e8a2e; color: var(--papel);
+    border: var(--borde); text-decoration: none; transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .banner:hover { transform: translate(-4px, -4px); box-shadow: var(--sombra); }
+  .banner img { width: clamp(120px, 22vw, 220px); height: auto; border: var(--borde); }
+  .banner span { font-size: clamp(0.8rem, 2.4vw, 1.2rem); font-weight: 700; text-align: right; line-height: 1.6; }
+
+  @media (max-width: 760px) {
+    .pie { grid-template-columns: 1fr; }
+  }
+</style>

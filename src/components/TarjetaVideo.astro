@@ -1,0 +1,202 @@
+---
+/**
+ * TarjetaVideo — panel de zine (referencia: paneles de color plano, texto en mono, sticker, halftone).
+ * Muestra la miniatura en duotono; al pasar el cursor reproduce el FRAGMENTO (sin sonido) a color.
+ * Al hacer clic abre el video COMPLETO en su plataforma (YouTube / TikTok / Instagram).
+ *
+ * El color del panel rota entre los colores de la marca según su posición (`indice`),
+ * o puedes fijarlo con `color:` en el .md del video.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { PANELES, etiqueta, fechaCorta, miniaturaYoutube, textoSobre } from '../utils';
+
+interface Props {
+  video: CollectionEntry<'videos'>;
+  indice?: number;
+}
+
+const { video, indice = 0 } = Astro.props;
+const { titulo, descripcion, fecha, plataforma, url, fragmento, miniatura, duracion, color } = video.data;
+
+const fondo = color ?? PANELES[indice % PANELES.length];
+const texto = textoSobre(fondo);
+const oscuro = texto !== '#1d1d1b';
+
+// El sticker usa mostaza, salvo que el panel ya sea mostaza (entonces rosa mexicano)
+const selloFondo = fondo.toLowerCase() === '#eac119' ? '#e4007c' : '#eac119';
+const selloTexto = textoSobre(selloFondo);
+
+const imagen = miniatura ?? (plataforma === 'youtube' ? miniaturaYoutube(url) : undefined);
+const nombrePlataforma = etiqueta(plataforma);
+const giro = ['-1.2deg', '0.8deg', '-0.6deg', '1.1deg'][indice % 4];
+---
+
+<article
+  class="panel"
+  data-oscuro={oscuro ? '' : undefined}
+  style={`--bg:${fondo};--fg:${texto};--sello-bg:${selloFondo};--sello-fg:${selloTexto};--giro:${giro}`}
+>
+  <a
+    class="enlace"
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={`Ver "${titulo}" completo en ${nombrePlataforma} (se abre en otra pestaña)`}
+  >
+    <p class="texto mono">{descripcion || `${nombrePlataforma} / ${titulo}`}</p>
+
+    <div class="portada" data-portada>
+      {imagen && <img src={imagen} alt="" loading="lazy" />}
+      {fragmento && <video src={fragmento} muted loop playsinline preload="none" tabindex="-1"></video>}
+
+      <span class={`plataforma ${plataforma}`}>{nombrePlataforma}</span>
+      {duracion && <span class="duracion">{duracion}</span>}
+      <span class="play" aria-hidden="true"></span>
+      <span class="aviso mono">Fragmento · ver completo ↗</span>
+    </div>
+
+    <h3>{titulo}</h3>
+
+    <p class="pie mono">
+      <span>{nombrePlataforma}</span>
+      <span>{fechaCorta(fecha)}</span>
+      <span>Ver completo ↗</span>
+    </p>
+
+    <span class="sello" aria-hidden="true">¡Míralo<br />completo!</span>
+  </a>
+</article>
+
+<style>
+  .panel {
+    position: relative; height: 100%;
+    background: var(--bg); color: var(--fg);
+    border: 3px solid var(--tinta);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .panel:hover, .panel:focus-within { transform: translate(-4px, -4px); box-shadow: var(--sombra); z-index: 2; }
+
+  .enlace {
+    position: relative; display: grid; grid-template-rows: auto 1fr auto auto; gap: 12px;
+    height: 100%; padding: 16px; color: inherit; text-decoration: none;
+  }
+
+  /* Texto de arriba: pequeño, en mono, como los párrafos de tu referencia */
+  .texto {
+    margin: 0; font-size: 0.68rem; line-height: 1.45; text-transform: none; letter-spacing: 0.02em;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* Ventana del video con duotono + halftone */
+  .portada {
+    position: relative; aspect-ratio: 16 / 10; overflow: hidden;
+    border: 3px solid var(--tinta); background: var(--bg); transform: rotate(var(--giro));
+    transition: transform 0.15s;
+  }
+  .panel:hover .portada { transform: rotate(0deg); }
+
+  .portada img, .portada video {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    filter: grayscale(1) contrast(1.25); mix-blend-mode: multiply;
+    transition: filter 0.2s;
+  }
+  .panel[data-oscuro] .portada img, .panel[data-oscuro] .portada video { mix-blend-mode: normal; }
+  .portada video { opacity: 0; transition: opacity 0.2s, filter 0.2s; }
+  .portada.reproduciendo video { opacity: 1; }
+
+  /* Puntos de halftone */
+  .portada::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.22;
+    background-image: radial-gradient(var(--tinta) 1px, transparent 1.5px); background-size: 4px 4px;
+    transition: opacity 0.2s;
+  }
+
+  /* Al pasar el cursor (o al reproducir): color completo, sin duotono */
+  .panel:hover .portada img, .panel:hover .portada video,
+  .panel:focus-within .portada img, .panel:focus-within .portada video,
+  .portada.reproduciendo img, .portada.reproduciendo video { filter: none; mix-blend-mode: normal; }
+  .panel:hover .portada::after, .portada.reproduciendo::after { opacity: 0; }
+
+  .plataforma {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    font: 700 0.65rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 5px 8px; border: 2px solid var(--tinta); background: var(--papel); color: var(--tinta);
+  }
+  .plataforma.youtube { background: var(--acento); color: var(--papel); }
+  .plataforma.tiktok { background: var(--tinta); color: var(--papel); }
+  .plataforma.instagram { background: var(--rosa); }
+
+  .duracion {
+    position: absolute; right: 8px; bottom: 8px; z-index: 2;
+    font: 700 0.7rem/1 var(--f-mono); padding: 4px 6px; background: var(--tinta); color: var(--papel);
+  }
+  .panel:hover .duracion { opacity: 0; }
+
+  .play {
+    position: absolute; z-index: 2; top: 50%; left: 50%; width: 52px; height: 52px;
+    transform: translate(-50%, -50%); background: var(--mostaza); border: 3px solid var(--tinta);
+    display: grid; place-items: center; transition: opacity 0.15s;
+  }
+  .play::before {
+    content: ''; border-left: 15px solid var(--tinta); border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent; margin-left: 4px;
+  }
+  .portada.reproduciendo .play { opacity: 0; }
+
+  .aviso {
+    position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; padding: 7px 10px; font-size: 0.65rem;
+    background: var(--tinta); color: var(--mostaza); transform: translateY(100%); transition: transform 0.15s;
+  }
+  .panel:hover .aviso, .panel:focus-within .aviso { transform: translateY(0); }
+
+  /* Título grande, como el lettering de tus referencias */
+  h3 { margin: 0; font-size: clamp(1.7rem, 3.4vw, 2.3rem); line-height: 0.9; align-self: end; }
+
+  .pie {
+    display: flex; justify-content: space-between; gap: 8px; margin: 0;
+    padding-top: 8px; border-top: 2px solid currentColor; font-size: 0.65rem;
+  }
+
+  /* Sticker en forma de estrella */
+  .sello {
+    position: absolute; z-index: 4; top: -14px; right: -10px; width: 88px; height: 88px;
+    display: grid; place-items: center; text-align: center; transform: rotate(10deg);
+    background: var(--sello-bg); color: var(--sello-fg);
+    font: 0.78rem/1 var(--f-marcador); text-transform: uppercase;
+    clip-path: polygon(50.0% 0.0%, 56.6% 12.6%, 67.1% 3.0%, 69.0% 17.1%, 82.1% 11.7%, 79.1% 25.6%, 93.3% 25.0%, 85.7% 37.0%, 99.2% 41.3%, 88.0% 50.0%, 99.2% 58.7%, 85.7% 63.0%, 93.3% 75.0%, 79.1% 74.4%, 82.1% 88.3%, 69.0% 82.9%, 67.1% 97.0%, 56.6% 87.4%, 50.0% 100.0%, 43.4% 87.4%, 32.9% 97.0%, 31.0% 82.9%, 17.9% 88.3%, 20.9% 74.4%, 6.7% 75.0%, 14.3% 63.0%, 0.8% 58.7%, 12.0% 50.0%, 0.8% 41.3%, 14.3% 37.0%, 6.7% 25.0%, 20.9% 25.6%, 17.9% 11.7%, 31.0% 17.1%, 32.9% 3.0%, 43.4% 12.6%);
+    transition: transform 0.15s;
+  }
+  .panel:hover .sello { transform: rotate(-6deg) scale(1.08); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel, .portada, .sello { transition: none; }
+  }
+</style>
+
+<script>
+  // Vista previa del fragmento: con mouse al pasar el cursor; en celular, mientras está a la vista.
+  const portadas = document.querySelectorAll<HTMLElement>('[data-portada]');
+  const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tactil = window.matchMedia('(hover: none)').matches;
+
+  portadas.forEach((p) => {
+    const v = p.querySelector('video');
+    if (!v || sinMovimiento) return;
+
+    const reproducir = () => { v.play().then(() => p.classList.add('reproduciendo')).catch(() => {}); };
+    const detener = () => { v.pause(); v.currentTime = 0; p.classList.remove('reproduciendo'); };
+
+    if (tactil) {
+      new IntersectionObserver(
+        (entradas) => entradas.forEach((e) => (e.intersectionRatio >= 0.6 ? reproducir() : detener())),
+        { threshold: [0, 0.6] }
+      ).observe(p);
+    } else {
+      const enlace = p.closest('a');
+      enlace?.addEventListener('mouseenter', reproducir);
+      enlace?.addEventListener('mouseleave', detener);
+      enlace?.addEventListener('focus', reproducir);
+      enlace?.addEventListener('blur', detener);
+    }
+  });
+</script>

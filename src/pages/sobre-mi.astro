@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITIO } from '../config';
+---
+
+<Base titulo="Sobre mí" descripcion="La historia detrás de la marca.">
+  <article class="contenedor seccion prosa">
+    <h1>Hola, soy [tu nombre]</h1>
+    <p>
+      Aquí cuentas tu historia: cómo empezó la marca, qué te inspira y por qué haces contenido.
+      Esta página es la más importante de una marca personal, así que escríbela con tu voz.
+    </p>
+    <p>
+      Sígueme en <a href={SITIO.instagram}>Instagram</a> y <a href={SITIO.tiktok}>TikTok</a>,
+      o escríbeme a <a href={`mailto:${SITIO.email}`}>{SITIO.email}</a>.
+    </p>
+  </article>
+</Base>
+
+<style>
+  h1 { font-size: clamp(2rem, 5vw, 3rem); }
+</style>

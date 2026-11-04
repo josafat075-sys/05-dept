@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import CatalogoInteractivo from '../components/CatalogoInteractivo.astro';
+import { SITIO } from '../config';
+
+const videos = (await getCollection('videos', ({ data }) => !data.borrador)).sort(
+  (a, b) => b.data.fecha.getTime() - a.data.fecha.getTime()
+);
+---
+
+<Base titulo="Videos" descripcion="Fragmentos de nuestros videos. El video completo está en YouTube y TikTok.">
+  <div class="contenedor seccion">
+    <div class="encabezado">
+      <h1>Videos</h1>
+      <span class="mono">{videos.length} publicados</span>
+    </div>
+
+    <div class="intro">
+      <p>
+        Aquí ves un <strong>fragmento</strong> de cada video. Haz clic para ver el
+        <strong>video completo</strong> en su plataforma.
+      </p>
+      <p class="canales">
+        <a class="boton" href={SITIO.youtube} target="_blank" rel="noopener noreferrer">Canal de YouTube ↗</a>
+        <a class="boton claro" href={SITIO.tiktok} target="_blank" rel="noopener noreferrer">TikTok ↗</a>
+      </p>
+    </div>
+
+    <CatalogoInteractivo tipo="videos" videos={videos} />
+  </div>
+</Base>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 5rem); margin: 0; }
+  .intro { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .intro p { margin: 0; max-width: 520px; }
+  .canales { display: flex; gap: 10px; flex-wrap: wrap; }
+</style>

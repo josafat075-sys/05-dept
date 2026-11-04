@@ -1,0 +1,87 @@
+# Completa turbo_site_id después de crear el sitio en Decap Turbo.
+backend:
+  name: turbo-github
+  turbo_site_id: bd85b347-8ad9-4fdf-9b42-0e381ea019f9
+  branch: main
+
+locale: es
+site_url: https://05dept05.com
+display_url: https://05dept05.com
+media_folder: public/uploads
+public_folder: /uploads
+publish_mode: simple
+show_preview_links: true
+slug:
+  encoding: unicode
+  clean_accents: true
+  sanitize_replacement: '-'
+
+collections:
+  - name: ropa
+    label: Productos / Ropa
+    label_singular: Producto
+    folder: src/content/ropa
+    identifier_field: nombre
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    summary: '{{nombre}} · ${{precio}} · {{categoria}}'
+    sortable_fields: [nombre, precio, categoria]
+    fields:
+      - { label: Nombre del producto, name: nombre, widget: string }
+      - { label: Precio (MXN), name: precio, widget: number, value_type: int, min: 0 }
+      - label: Categoría
+        name: categoria
+        widget: select
+        options:
+          - { label: Chaquetas, value: chaquetas }
+          - { label: Playeras, value: playeras }
+          - { label: Sudaderas, value: sudaderas }
+          - { label: Pantalones, value: pantalones }
+          - { label: Accesorios, value: accesorios }
+      - { label: Fotografía principal, name: imagen, widget: image, required: false }
+      - label: Galería de fotografías
+        name: galeria
+        widget: list
+        required: false
+        field: { label: Fotografía, name: foto, widget: image }
+      - { label: Color de fondo (si no hay foto), name: color, widget: color, default: '#eaa7c7', allowInput: true }
+      - label: Tallas disponibles
+        name: tallas
+        widget: list
+        required: false
+        field: { label: Talla, name: talla, widget: string }
+      - { label: Mostrar en portada, name: destacado, widget: boolean, default: false, required: false }
+      - { label: Vendido / No disponible, name: agotado, widget: boolean, default: false, required: false }
+      - { label: Enlace externo de compra (opcional), name: linkCompra, widget: string, required: false }
+      - { label: Descripción, name: body, widget: richtext }
+
+  - name: videos
+    label: Videos / Publicaciones
+    label_singular: Video o publicación
+    folder: src/content/videos
+    identifier_field: titulo
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    summary: '{{titulo}} · {{plataforma}}'
+    sortable_fields: [titulo, fecha, plataforma]
+    fields:
+      - { label: Título, name: titulo, widget: string }
+      - { label: Descripción corta, name: descripcion, widget: text, required: false }
+      - { label: Fecha, name: fecha, widget: datetime, date_format: 'YYYY-MM-DD' }
+      - label: Plataforma
+        name: plataforma
+        widget: select
+        options: [youtube, tiktok, instagram]
+      - { label: Enlace al video publicado, name: url, widget: string }
+      - { label: Fragmento de video (opcional), name: fragmento, widget: file, required: false }
+      - { label: Imagen miniatura (opcional), name: miniatura, widget: image, required: false }
+      - { label: Duración (opcional), name: duracion, widget: string, required: false }
+      - { label: Color de tarjeta (opcional), name: color, widget: color, required: false }
+      - { label: Guardar como borrador, name: borrador, widget: boolean, default: false, required: false }
+      - { label: Texto adicional, name: body, widget: richtext, required: false }

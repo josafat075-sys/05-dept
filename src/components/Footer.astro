@@ -1,0 +1,58 @@
+---
+import { SITIO } from '../config';
+const año = new Date().getFullYear();
+---
+
+<footer>
+  <div class="contenedor rejilla-pie">
+    <img class="logo" src="/img/logo-05dept-blanco.jpg" alt={SITIO.nombre} width="160" height="160" loading="lazy" />
+
+    <div>
+      <p class="mono">Síguenos</p>
+      <ul>
+        <li><a href={SITIO.instagram} rel="noopener">Instagram</a></li>
+        <li><a href={SITIO.tiktok} rel="noopener">TikTok</a></li>
+        <li><a href={SITIO.youtube} rel="noopener">YouTube</a></li>
+        <li><a href={`mailto:${SITIO.email}`}>Contacto</a></li>
+      </ul>
+    </div>
+
+    <div class="codigo" aria-hidden="true">
+      <div class="barras"></div>
+      <p class="mono">05DEPT-{año}-001</p>
+    </div>
+  </div>
+
+  <p class="legal mono contenedor">© {año} {SITIO.nombre} — Todos los derechos reservados</p>
+</footer>
+
+<style>
+  footer { background: var(--tinta); color: var(--papel); margin-top: 72px; padding-top: 40px; border-top: 6px solid var(--mostaza); }
+
+  .rejilla-pie { display: grid; gap: 32px; grid-template-columns: 160px 1fr 1fr; align-items: start; }
+  .logo { width: 160px; height: 160px; border: 2px solid var(--papel); object-fit: cover; }
+
+  p { margin: 0; }
+  ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  ul a { font: 900 1.4rem/1 var(--f-display); font-stretch: 125%; text-transform: uppercase; text-decoration: none; letter-spacing: -0.02em; }
+  ul a:hover { color: var(--mostaza); }
+
+  /* Código de barras decorativo, como las etiquetas de tus referencias */
+  .barras {
+    height: 64px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--papel) 0 2px, transparent 2px 5px,
+      var(--papel) 5px 6px, transparent 6px 10px,
+      var(--papel) 10px 14px, transparent 14px 16px,
+      var(--papel) 16px 17px, transparent 17px 21px
+    );
+  }
+  .codigo p { margin-top: 8px; opacity: 0.7; }
+
+  .legal { padding-block: 28px 24px; opacity: 0.7; }
+
+  @media (max-width: 720px) {
+    .rejilla-pie { grid-template-columns: 1fr; }
+  }
+</style>

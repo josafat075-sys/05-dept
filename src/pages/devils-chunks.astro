@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import TarjetaChunk from '../components/TarjetaChunk.astro';
+import { etiqueta } from '../utils';
+
+/**
+ * DEVIL'S CHUNKS — galletas y brownies.
+ * Los dos logos ya traen su propia tipografía, por eso se usan como imagen y no como texto.
+ * Los productos viven en src/content/chunks/ (un archivo .md por producto).
+ */
+const todos = (await getCollection('chunks')).sort((a, b) => a.data.orden - b.data.orden);
+
+const grupos = (['brownies', 'galletas'] as const)
+  .map((cat) => ({ cat, items: todos.filter((c) => c.data.categoria === cat) }))
+  .filter((g) => g.items.length > 0);
+---
+
+<Base titulo="Devil's Chunks" descripcion="Devil's Chunks: galletas y brownies. Better with Friends. Un proyecto de 05 DEPT.">
+  <section class="contenedor hero">
+    <h1 class="solo-lectores">Devil's Chunks — galletas y brownies — Better with Friends</h1>
+
+    <div class="mundo">
+      <p class="mono etiqueta">Proyecto 02 / 05 DEPT. · Galletas y brownies</p>
+
+      <div class="logos">
+        <figure class="portada">
+          <img
+            src="/img/devils-chunks-portada.jpg"
+            alt="Devil's Chunks: un diablo rojo con el pulgar arriba sobre fondo verde"
+            width="1400" height="1419" fetchpriority="high"
+          />
+        </figure>
+        <figure class="logo">
+          <img
+            src="/img/devils-chunks-logo.jpg"
+            alt="Devil's Chunks, Better with Friends: un diablo y un chunk caminando abrazados"
+            width="1108" height="1050"
+          />
+        </figure>
+      </div>
+
+      <p class="texto">
+        Aquí va la descripción de Devil's Chunks: cómo nació, qué los hace distintos y cómo se piden.
+      </p>
+    </div>
+  </section>
+
+  {
+    grupos.map((g, n) => (
+      <section class="seccion contenedor">
+        <div class="encabezado">
+          <h2>{etiqueta(g.cat)}</h2>
+          <span class="mono">0{n + 1} / {g.items.length} {g.items.length === 1 ? 'producto' : 'productos'}</span>
+        </div>
+        <ul class="rejilla">
+          {g.items.map((c) => <li><TarjetaChunk chunk={c} /></li>)}
+        </ul>
+      </section>
+    ))
+  }
+
+  {
+    grupos.length === 0 && (
+      <section class="seccion contenedor">
+        <p class="mono">Pronto habrá productos aquí.</p>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero { padding-block: 32px 8px; }
+
+  /* El verde sale de tu portada; el neón, del contorno del diablo */
+  .mundo {
+    --verde: #0e8a2e;
+    --neon: #2cff1f;
+    background: var(--verde); color: var(--papel);
+    border: var(--borde); box-shadow: 8px 8px 0 var(--neon);
+    padding: clamp(16px, 4vw, 40px);
+    display: grid; gap: 24px;
+  }
+  .mundo p { margin: 0; }
+  .etiqueta { color: var(--neon); }
+
+  .logos { display: grid; gap: clamp(16px, 3vw, 32px); grid-template-columns: 1fr 1fr; align-items: start; }
+  figure { margin: 0; }
+  figure img { width: 100%; height: auto; border: 3px solid var(--tinta); background: var(--papel); }
+  .portada { transform: rotate(-1.5deg); }
+  .logo { transform: rotate(1.5deg); }
+
+  .texto { max-width: 620px; font-size: 1.05rem; }
+
+  .solo-lectores {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .rejilla { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+  @media (max-width: 640px) {
+    .logos { grid-template-columns: 1fr; }
+  }
+</style>

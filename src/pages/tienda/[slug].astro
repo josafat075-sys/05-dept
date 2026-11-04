@@ -1,0 +1,80 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { etiqueta, precio } from '../../utils';
+import { SITIO } from '../../config';
+
+export async function getStaticPaths() {
+  const prendas = await getCollection('ropa');
+  return prendas.map((prenda) => ({ params: { slug: prenda.id }, props: { prenda } }));
+}
+
+const { prenda } = Astro.props;
+const { Content } = await render(prenda);
+const { nombre, precio: valor, categoria, imagen, galeria, color, tallas, agotado, linkCompra } = prenda.data;
+const fotoPrincipal = imagen || galeria[0];
+const fotosAdicionales = galeria.filter((foto) => foto !== fotoPrincipal);
+const whatsappConfigurado = /^\d{10,15}$/.test(SITIO.whatsapp);
+const mensajeWhatsApp = encodeURIComponent(`Hola, me interesa ${nombre} de 05 DEPT. ¿Sigue disponible?`);
+const enlaceWhatsApp = whatsappConfigurado ? `https://wa.me/${SITIO.whatsapp}?text=${mensajeWhatsApp}` : '';
+---
+
+<Base titulo={nombre} descripcion={`${nombre} · ${precio(valor)}`}>
+  <article class="contenedor seccion ficha">
+    <div class="galeria-producto">
+      <div class="foto" style={`background:${color}`}>
+        {fotoPrincipal ? <img src={fotoPrincipal} alt={nombre} /> : <span>{nombre.charAt(0)}</span>}
+      </div>
+      {fotosAdicionales.length > 0 && (
+        <div class="fotos-adicionales">
+          {fotosAdicionales.map((foto, indice) => <img src={foto} alt={`${nombre} — fotografía ${indice + 2}`} loading="lazy" />)}
+        </div>
+      )}
+    </div>
+
+    <div>
+      <p class="cat"><a href="/tienda">← Tienda</a> · {etiqueta(categoria)}</p>
+      <h1>{nombre}</h1>
+      <p class="precio">{precio(valor)}</p>
+
+      {
+        tallas.length > 0 && (
+          <p class="tallas">
+            Tallas: {tallas.map((t) => <span>{t}</span>)}
+          </p>
+        )
+      }
+
+      <div class="prosa-ficha"><Content /></div>
+
+      {
+        agotado ? (
+          <span class="boton" aria-disabled="true">Vendido</span>
+        ) : linkCompra ? (
+          <a class="boton" href={linkCompra} rel="noopener">Comprar ahora</a>
+        ) : whatsappConfigurado ? (
+          <a class="boton" href={enlaceWhatsApp} target="_blank" rel="noopener noreferrer">Consultar por WhatsApp ↗</a>
+        ) : (
+          <span class="boton" aria-disabled="true">Configura WhatsApp en src/config.ts</span>
+        )
+      }
+    </div>
+  </article>
+</Base>
+
+<style>
+  .ficha { display: grid; gap: 40px; grid-template-columns: 1fr; }
+  @media (min-width: 800px) { .ficha { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .foto { aspect-ratio: 4 / 5; border: var(--borde); overflow: hidden; display: grid; place-items: center; }
+  .galeria-producto { min-width: 0; }
+  .fotos-adicionales { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+  .fotos-adicionales img { width: 100%; aspect-ratio: 1; object-fit: cover; border: var(--borde); }
+  .foto img { width: 100%; height: 100%; object-fit: cover; }
+  .foto span { font: 700 8rem Georgia, serif; opacity: 0.2; }
+  .cat { color: var(--suave); font: 700 0.75rem var(--f-mono); margin: 0; text-transform: uppercase; letter-spacing: 0.08em; }
+  .cat a { text-decoration: none; }
+  h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 8px 0; }
+  .precio { font: 700 1.6rem var(--f-mono); margin: 0 0 16px; }
+  .tallas span { display: inline-block; border: var(--borde); padding: 4px 12px; margin: 0 6px 6px 0; background: var(--papel); font: 700 0.8rem var(--f-mono); }
+  .prosa-ficha { margin: 20px 0 28px; color: var(--suave); }
+</style>

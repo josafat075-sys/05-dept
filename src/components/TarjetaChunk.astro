@@ -1,0 +1,73 @@
+---
+/**
+ * TarjetaChunk — un producto de Devil's Chunks (galleta o brownie).
+ * El botón "Pedir" abre WhatsApp con el mensaje ya escrito, o el `linkPedido` del producto si lo tiene.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { SITIO } from '../config';
+import { etiqueta, precio, waLink } from '../utils';
+
+interface Props {
+  chunk: CollectionEntry<'chunks'>;
+}
+
+const { chunk } = Astro.props;
+const { nombre, precio: valor, categoria, presentacion, descripcion, ingredientes, imagen, color, agotado, linkPedido } =
+  chunk.data;
+
+const enlace = linkPedido ?? waLink(SITIO.whatsapp, `Hola, quiero pedir: ${nombre}`);
+---
+
+<article class="chunk">
+  <div class="foto" style={`background:${color}`}>
+    {imagen ? <img src={imagen} alt={nombre} loading="lazy" /> : <span aria-hidden="true">{nombre.charAt(0)}</span>}
+    {agotado && <b class="sello">Agotado</b>}
+  </div>
+
+  <div class="info">
+    <small class="mono">{etiqueta(categoria)}{presentacion ? ` · ${presentacion}` : ''}</small>
+    <h3>{nombre}</h3>
+    {descripcion && <p class="desc">{descripcion}</p>}
+    {ingredientes && <p class="ing mono"><b>Ingredientes:</b> {ingredientes}</p>}
+
+    <div class="compra">
+      <p class="precio mono">{precio(valor)}</p>
+      {
+        agotado ? (
+          <span class="boton" aria-disabled="true">Agotado</span>
+        ) : enlace ? (
+          <a class="boton" href={enlace} target="_blank" rel="noopener noreferrer">Pedir</a>
+        ) : (
+          <span class="boton" aria-disabled="true">Próximamente</span>
+        )
+      }
+    </div>
+  </div>
+</article>
+
+<style>
+  .chunk { display: flex; flex-direction: column; height: 100%; background: var(--papel); border: var(--borde); }
+
+  .foto {
+    position: relative; aspect-ratio: 1 / 1; overflow: hidden;
+    display: grid; place-items: center; border-bottom: var(--borde);
+  }
+  .foto img { width: 100%; height: 100%; object-fit: cover; }
+  .foto span { font: 900 6rem/1 var(--f-display); font-stretch: 125%; opacity: 0.18; }
+
+  .sello {
+    position: absolute; top: 10px; left: 10px; transform: rotate(-4deg);
+    font: 700 0.7rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 6px 10px; background: var(--acento); color: var(--papel); border: var(--borde);
+  }
+
+  .info { display: flex; flex-direction: column; gap: 8px; flex: 1; padding: 14px; }
+  small { color: var(--suave); }
+  h3 { margin: 0; font-size: 1.25rem; }
+  .desc { margin: 0; color: var(--suave); font-size: 0.92rem; }
+  .ing { margin: 0; font-size: 0.68rem; line-height: 1.5; text-transform: none; letter-spacing: 0.02em; }
+
+  .compra { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .precio { margin: 0; font-size: 1.1rem; font-weight: 700; }
+  .boton { padding: 10px 18px; }
+</style>

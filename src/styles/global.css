@@ -1,0 +1,172 @@
+/* ==========================================================
+   05 DEPT. — brutalismo + editorial
+   Todo el look del sitio sale de las variables de :root.
+   Cambia un color aquí y se actualiza en toda la página.
+   ========================================================== */
+
+:root {
+  /* Paleta (referencia: Muted Black / Seashell / Mustard / Lavander / Pink Quartz / Sky / Tea / Tangerine / Red Passion) */
+  --tinta: #111315;     /* Muted Black: texto, bordes, barra */
+  --papel: #f2eadb;     /* Seashell: fondo y tarjetas */
+  --fondo: #e8e0d2;
+  --suave: #625c55;     /* texto secundario */
+  --linea: #111315;     /* bordes */
+  --mostaza: #f5c928;   /* Mustard Yellow: acento principal (hover, cinta, activos) */
+  --acento: #f04a38;    /* Red Passion */
+  --rosa: #f2a5c8;      /* Pink Quartz */
+  --fucsia: #e6005c;    /* Rosa mexicano */
+  --velvet: #8b1738;    /* Rojo velvet */
+
+  --crema: #f2eadb;
+  --verde: #31b879;
+  --azul: #145b83;
+  --radio: 0px;         /* brutalismo: esquinas rectas */
+  --borde: 2px solid var(--tinta);
+  --sombra: 6px 6px 0 var(--tinta);
+  --ancho: 1240px;
+
+  /* Tipografías (se cargan en layouts/Base.astro) */
+  --f-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono: 'Space Mono', ui-monospace, 'Courier New', monospace;
+  --f-gotica: 'UnifrakturCook', 'Old English Text MT', serif;
+  --f-marcador: 'Permanent Marker', 'Marker Felt', cursive; /* stickers y notas a mano */
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--f-display);
+  line-height: 1.55;
+}
+
+/* Grano sobre toda la página (el mismo ruido de tus logos) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.2;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Titulares: negros, anchos, en mayúsculas */
+h1, h2, h3 {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+  overflow-wrap: anywhere;
+}
+
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--mostaza); color: var(--tinta); }
+
+:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+
+/* Sin esto, display:flex/grid anula el atributo hidden */
+[hidden] { display: none !important; }
+
+.contenedor {
+  max-width: var(--ancho);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+/* Etiquetas en monoespaciada, estilo sticker / ficha técnica */
+.mono {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Detalle gótico (hace eco de tu logo con DEPT. en blackletter) */
+.gotica {
+  font-family: var(--f-gotica);
+  text-transform: none;
+  font-stretch: 100%;
+  letter-spacing: 0;
+}
+
+.boton {
+  display: inline-block;
+  padding: 14px 24px;
+  background: var(--tinta);
+  color: var(--papel);
+  border: var(--borde);
+  font-family: var(--f-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s, color 0.12s;
+}
+.boton:hover {
+  background: var(--mostaza);
+  color: var(--tinta);
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--tinta);
+}
+.boton.claro { background: var(--papel); color: var(--tinta); }
+.boton[aria-disabled='true'] {
+  background: transparent;
+  color: var(--suave);
+  border-style: dashed;
+  pointer-events: none;
+}
+
+.seccion { padding-block: 56px; }
+
+/* Encabezado de sección editorial: título a la izquierda, número a la derecha */
+.encabezado {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 4px solid var(--tinta);
+  padding-bottom: 10px;
+  margin-bottom: 28px;
+}
+.encabezado h2 { margin: 0; font-size: clamp(2rem, 6vw, 4rem); }
+
+.rejilla {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.prosa { max-width: 700px; margin-inline: auto; }
+.prosa h2 { margin-top: 2em; font-size: 1.6rem; }
+.prosa a { background: var(--mostaza); text-decoration: none; padding: 0 2px; }
+
+
+/* 05 DEPT. — gráfica de archivo / streetwear */
+body { background-color: var(--fondo); }
+::selection { background: var(--fucsia); color: #fff; }
+.seccion { padding-block: clamp(42px, 6vw, 76px); }
+.encabezado { border-bottom: 4px solid var(--fucsia); position:relative; }
+.encabezado::after { content:'✳'; color:var(--verde); font-size:1.5rem; position:absolute; right:0; bottom:-17px; background:var(--fondo); padding-left:8px; }
+.encabezado h2 { letter-spacing:-.07em; }
+.boton { box-shadow: 4px 4px 0 var(--fucsia); }
+.boton:hover { background:var(--verde); box-shadow:5px 5px 0 var(--tinta); }
+.prosa a { background:var(--verde); }
+@media (max-width: 560px) {
+  .contenedor { padding-inline:16px; }
+  .seccion { padding-block:38px; }
+}
